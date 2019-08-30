@@ -1,0 +1,28 @@
+{
+  "nodes":
+    [
+      {"id":1,"name":"Y","parents":[]},
+      {"id":2,"name":"Z","parents":[]},
+      {"id":3,"name":"a","parents":[{"id":1,"w":0.8853},{"id":2,"w":0.0205}]},
+      {"id":4,"name":"b","parents":[{"id":1,"w":0.8406},{"id":2,"w":0.027}]},
+      {"id":5,"name":"c","parents":[{"id":1,"w":0.228},{"id":2,"w":0.5699}]},
+      {"id":6,"name":"d","parents":[{"id":1,"w":0.2163},{"id":2,"w":0.6511}]},
+      {"id":7,"name":"E","parents":[{"id":1,"w":0.857},{"id":2,"w":0.0249}]},
+      {"id":8,"name":"F","parents":[{"id":1,"w":0.2143},{"id":2,"w":0.6773}]}
+    ],
+  "links":
+    [
+      {"source":1,"target":3,"leaving":0.8853,"arriving":0.7135},
+      {"source":2,"target":3,"leaving":0.1923,"arriving":0.0205},
+      {"source":1,"target":4,"leaving":0.8406,"arriving":0.6523},
+      {"source":2,"target":4,"leaving":0.2153,"arriving":0.027},
+      {"source":1,"target":5,"leaving":0.228,"arriving":0.0457},
+      {"source":2,"target":5,"leaving":0.7522,"arriving":0.5699},
+      {"source":1,"target":6,"leaving":0.2163,"arriving":0.027},
+      {"source":2,"target":6,"leaving":0.8404,"arriving":0.6511},
+      {"source":1,"target":7,"leaving":0.857,"arriving":0.6648},
+      {"source":2,"target":7,"leaving":0.2171,"arriving":0.0249},
+      {"source":1,"target":8,"leaving":0.2143,"arriving":0.0232},
+      {"source":2,"target":8,"leaving":0.8684,"arriving":0.6773}
+    ]
+}

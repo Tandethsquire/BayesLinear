@@ -1,0 +1,31 @@
+{
+  "nodes":
+    [
+      {"id":1,"name":"a","parents":[]},
+      {"id":2,"name":"b","parents":[{"id":1,"w":0.04}]},
+      {"id":3,"name":"c","parents":[{"id":1,"w":0.25},{"id":2,"w":0.0104}]},
+      {"id":4,"name":"d","parents":[{"id":1,"w":0},{"id":2,"w":0.2604},{"id":3,"w":0.0859}]},
+      {"id":5,"name":"E","parents":[]},
+      {"id":6,"name":"F","parents":[{"id":5,"w":0.25}]},
+      {"id":7,"name":"W+","parents":[{"id":1,"w":0.2264},{"id":2,"w":0.2157},{"id":3,"w":0.1596},{"id":4,"w":0.1623},{"id":5,"w":0.1457},{"id":6,"w":0.0903}]},
+      {"id":8,"name":"W0","parents":[{"id":5,"w":0.5},{"id":6,"w":0.5}]}
+    ],
+  "links":
+    [
+      {"source":1,"target":2,"leaving":0.04,"arriving":0.04},
+      {"source":1,"target":3,"leaving":0.25,"arriving":0.2604},
+      {"source":2,"target":3,"leaving":0,"arriving":0.0104},
+      {"source":1,"target":4,"leaving":0,"arriving":0.0563},
+      {"source":2,"target":4,"leaving":0.25,"arriving":0.293},
+      {"source":3,"target":4,"leaving":0.04,"arriving":0.0859},
+      {"source":5,"target":6,"leaving":0.25,"arriving":0.25},
+      {"source":1,"target":7,"leaving":0.2264,"arriving":0.1696},
+      {"source":2,"target":7,"leaving":0.2169,"arriving":0.1631},
+      {"source":3,"target":7,"leaving":0.1995,"arriving":0.143},
+      {"source":4,"target":7,"leaving":0.2169,"arriving":0.1623},
+      {"source":5,"target":7,"leaving":0.1457,"arriving":0.0611},
+      {"source":6,"target":7,"leaving":0.1749,"arriving":0.0903},
+      {"source":5,"target":8,"leaving":0.5,"arriving":0.5},
+      {"source":6,"target":8,"leaving":0.5,"arriving":0.5}
+    ]
+}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nodes</title>
+  <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML">
+  </script>
+  <script type='text/javascript' src='saveSvgAsPng.js'></script>
+</head>
+<body>
+  <div id="container">
+  </div>
+  <div id="options">
+    <select onchange = "init(this.value);">
+      <option value='baseData.json'>Basic Data</option>
+      <option value='combinedData.json'>Combining {a,b}=Gy and {c,d}=Gz</option>
+      <option value='childData.json'>Reversed dependencies</option>
+      <option value='heartData.json'>Heart of the transform</option>
+    </select>
+  </div>
+  <button id='saveButton'>Save as PNG</button>
+  <script type="text/javascript">
+    var radius = 70;
+    var rectwidth = radius, rectheight = radius/5;
+    var data, colour;
+
+    function styleCircle(d,ctx)
+    {
+      ctx.selectAll('*').remove();
+      ctx.append('circle')
+        .attr('r', radius)
+        .attr('fill', '#fff')
+        .attr('stroke', '#000')
+      var angles = [0], colours = [];
+      for (var i=0; i<d.parents.length; i++)
+      {
+        angles.push(angles[angles.length-1] + 2*Math.PI*d.parents[i].w);
+        colours.push(colour(d.parents[i].id));
+      }
+      angles = angles.map(s => Math.PI/2 - s).slice(1);
+      for (var i=angles.length-1; i>=0; i--)
+      {
+        ctx.append('path')
+          .attr('d', d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius)
+            .startAngle(Math.PI/2)
+            .endAngle(angles[i])
+          )
+          .attr('fill', colours[i])
+          .attr('stroke', 'black')
+      }
+      ctx.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('alignment-baseline', 'bottom')
+        .attr('dy', -1*radius)
+        .text(d => d.name)
+        .style('fill', d => colour(d.id))
+        .style('font', `${radius/2}px sans-serif`)
+        .attr('stroke', 'none');
+    }
+
+    function drawBar(d,ctx)
+    {
+      ctx.selectAll('*').remove();
+      var pline = ctx.append('polyline')
+        .attr('stroke', '#000');
+      var rectgroup = ctx.append('g');
+      rectgroup.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', rectwidth)
+        .attr('height', rectheight)
+        .attr('stroke', '#000')
+        .attr('fill', 'none')
+      rectgroup.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', rectwidth*d.leaving/2)
+        .attr('height', rectheight)
+        .attr('stroke', '#000')
+        .attr('fill', d => colour(d.source))
+      rectgroup.append('rect')
+        .attr('x', rectwidth-rectwidth*d.arriving/2)
+        .attr('y', 0)
+        .attr('width', rectwidth*d.arriving/2)
+        .attr('height', rectheight)
+        .attr('stroke', '#000')
+        .attr('fill', d => colour(d.target))
+      rectgroup.append('path')
+        .attr('d', `M ${rectwidth+5} 0 L ${rectwidth + 15} ${rectheight/2} L ${rectwidth + 5} ${rectheight}`)
+        .attr('stroke', '#000')
+        .attr('fill', 'none')
+    }
+
+    function drawGraph()
+    {
+      d3.select('#container').selectAll('svg').remove();
+      var margin = {top: 10, right: 30, bottom: 30, left: 40},
+        width = 1000 - margin.left - margin.right;
+        height = 1000 - margin.top - margin.bottom;
+
+      var svg = d3.select('#container').append('svg');
+      svg.attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+
+      var gp = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+      var simulation = d3.forceSimulation()
+        .force('link', d3.forceLink().id(d => d.id))
+        .force('charge', d3.forceManyBody().strength(-2000))
+        .force('center', d3.forceCenter(width/2, height/2));
+
+      gp.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'none')
+        .attr('stroke', 'black')
+
+      var link = gp.selectAll('.linkline')
+        .data(data.links)
+        .enter()
+        .append('g')
+          .attr('class', 'linkline')
+
+      var node = gp.selectAll('.node')
+        .data(data.nodes)
+        .enter()
+        .append('g')
+        .attr('class', 'node')
+        .call(d3.drag()
+          .on('start', dragstarted)
+          .on('drag', dragged)
+        );
+
+      node.each(function(d) {
+          styleCircle(d, d3.select(this));
+        });
+
+      link.each(function(d) {
+          drawBar(d, d3.select(this));
+        });
+
+      simulation.nodes(data.nodes)
+        .on('tick', ticked);
+      simulation.force('link')
+        .links(data.links);
+
+      function ticked() {
+        link.each(function (d) {
+          d3.select(this).select('polyline').attr('points', d => `${d.source.x}, ${d.source.y} ${(d.source.x + d.target.x)/2}, ${(d.source.y + d.target.y)/2} ${d.target.x}, ${d.target.y}`);
+          var ang = Math.atan2(d.target.y-d.source.y, d.target.x-d.source.x);
+          d3.select(this).select('g')
+            .attr('transform' , `translate(${(d.source.x + d.target.x-rectwidth)/2}, ${(d.source.y + d.target.y-rectheight)/2})rotate(${180*ang/Math.PI},${rectwidth/2},${rectheight/2})`);
+        });
+
+        node.attr('transform', d => `translate(${d.x}, ${d.y})`);
+      }
+
+      function dragstarted(d) {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragged(d) {
+        d.fx = (d3.event.x < radius+10) ? radius+10: (d3.event.x > width-radius-10) ? width-radius-10 : d3.event.x;
+        d.fy = (d3.event.y < 3*radius/2) ? 3*radius/2: (d3.event.y > height-radius-10) ? height-radius-10 : d3.event.y;
+      }
+    }
+    d3.select('#saveButton').on('click', function(){
+      saveSvgAsPng(document.getElementsByTagName('svg')[0], 'graph.png', {scale:2, backgroundColor: '#FFF'});
+    });
+
+    function init(filename) {
+      d3.json(`Nodes/${filename}`).then(function (json) {
+        data = json;
+        colour = d3.scaleOrdinal(d3.schemeSpectral[data.nodes.length]);
+        drawGraph();
+      });
+    }
+    init('baseData.json');
+  </script>
+</body>

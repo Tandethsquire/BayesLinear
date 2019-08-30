@@ -1,0 +1,20 @@
+{
+  "nodes":
+    [
+      {"id":1,"name":"Gy","parents":[]},
+      {"id":2,"name":"Gz","parents":[{"id":1,"w":0.2821}]},
+      {"id":3,"name":"E","parents":[]},
+      {"id":4,"name":"F","parents":[{"id":3,"w":0.25}]},
+      {"id":5,"name":"Y","parents":[{"id":1,"w":0.143},{"id":3,"w":0.857}]},
+      {"id":6,"name":"Z","parents":[{"id":2,"w":0.1316},{"id":4,"w":0.8684}]}
+    ],
+  "links":
+    [
+      {"source":1,"target":2,"leaving":0.2821,"arriving":0.2821},
+      {"source":3,"target":4,"leaving":0.25,"arriving":0.25},
+      {"source":1,"target":5,"leaving":0.143,"arriving":0.143},
+      {"source":3,"target":5,"leaving":0.857,"arriving":0.857},
+      {"source":2,"target":6,"leaving":0.1316,"arriving":0.1316},
+      {"source":4,"target":6,"leaving":0.8684,"arriving":0.8684}
+    ]
+}
