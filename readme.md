@@ -13,14 +13,15 @@ Such an approach allows us to consider which models will most affect the underst
 The code is in multiple parts (which will continue to be modified and re-jigged as time goes on). Files described earlier will typically (but not always) be dependencies of the later files.
 - *boilerplate.js* : This contains a set of generic, all-purpose functions for doing generally boring things (e.g. finding the sign of a number, printing out a matrix in user-friendly format)
 - *matrixAlgebra.js* : This does a large part of the computational heavy lifting. There are the usual matrix operations (addition, multiplication, trace etc), functions to find eigenvalues and eigenvectors, inversion of matrices, and so on. Most of the important functionality is based about QR Decomposition, which reduces a matrix to upper-triangular form.
-- *BL.js* : This deals with belief comparisons. Functions here calculate canonical quantities of some chosen belief(s), find observed adjustments, work out residuals for specification diagnostics, and package this information up in an easily-exportable way.
-- *treeResolution.js* : This has a similar scope to BL.js, but it centres around node resolutions and node diagnostics. The central object is an `rV`: a random variable that has an expectation and variance, along with means by which we can create other random variables from linear combinations. Functions are used to generate (potentially partial) transformation matrices for B given D, calculate uncertainty resolution from one random variable to another, find bearings and sizes of adjustments, find the heart of a transform, and create a tree of dependencies from the result.
+- *varianceComparison.js* : This deals with belief comparisons. Functions here calculate canonical quantities of some chosen belief(s), find observed adjustments, work out residuals for specification diagnostics, and package this information up in an easily-exportable way.
+- *RV.js* : A small file for defining and dealing with random variables. Creates objects of type `rV`, with expectation, variance, and covariances as properties.
+- *uncertaintyResolution.js* : This has a similar scope to varianceComparison.js, but it centres around node resolutions and node diagnostics. Functions operating on `rV` objects are used to generate (potentially partial) transformation matrices for B given D, calculate uncertainty resolution from one random variable to another, find bearings and sizes of adjustments, find the heart of a transform, and create a tree of dependencies from the result.
 - *<filename\>.html*: Typically used for displaying the results of the above packages. D3.js is used heavily to create visualisations of these adjustments, dependencies, and resolutions.
 
 ## Usage ##
 Any pure JavaScript files are written with command-line usage in mind, and particularly using node.js. Outputs can be written to file (in json or csv format) to be pushed to the .html visualisation.
 
-### BL.js ###
+### varianceComparison.js ###
 Take a system of two variables, X1 and X2. Define the variance in two different specifications H1 and H2 as
 - **H1**: Var(X1)=2, Var(X2)=4, Cov(X1,X2)=1, E(X1)=0, E(X2)=0;
 - **H2**: Var(X1)=2, Var(X2)=2, Cov(X1,X2)=1, E(X1)=0, E(X2)=1.
@@ -50,7 +51,7 @@ console.log(standardised(canonical, U1, U2, E1, E2, X));
  */
 ```
 
-### treeResolution.js ###
+### uncertaintyResolution.js ###
 Suppose we have a variable Y which is given by a linear relation Y=a+2b+e. The variances of a,b,e are assumed to be
 
 Var(a)=4, Var(b)=3, Var(e)=0.5, Cov(a,b)=-1, Cov(a,e)=0=Cov(b,e)
@@ -61,13 +62,12 @@ E(a)=1, E(b)=2, E(e)=0.
 
 e is an error or 'noise' term. Then Y is fully determined by its parents.
 ``` javascript
-var a = new rV('a',1,4), b = new rV('b',2,3);
+var a = new RV.rV('a',1,4), b = new rV('b',2,3);
 a.setCov(b,-1);
-var e = new rV('e',0,0.5);
+var e = new RV.rV('e',0,0.5);
 e.setCov(a,0);
 e.setCov(b,0);
-globalArr = combineRV([a,b,e])
-var Y = a.add(e.add(b.multiply(2)),'Y',false);
+var Y = new RV.rV('Y', {'rvs': [a,b,e], 'coeffs': [1,2,1]});
 console.log(Y);
 /**
  * Output is a rV with fields

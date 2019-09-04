@@ -213,12 +213,16 @@ var transpose = function (A)
  * Typically, the inner product describes a variance matrix, so this effectively
  * finds the variance of a linear combination of quantities under a particular
  * variance specification.
- * @param  {Array[Number]} v The vector
+ * @param  {Array[Array[Number]]} v1 The vector (as a matrix)
  * @param  {Array[Array[Number]]} A The inner product
+ * @param  {Array[Array[Number]]} v2=null Optional: second vector. If null, assume v1.v1
  * @return {Number}   The length/norm/variance
  */
-var innerProd = function (v, A) {
-  return base.mRound(mult(transpose(v),mult(A,v))[0][0],7);
+var innerProd = function (v1, A, v2=null) {
+  if (v2 === null)
+    return base.mRound(mult(transpose(v1),mult(A,v1))[0][0],7);
+  else
+    return base.mRound(mult(transpose(v1),mult(A,v2))[0][0],7);
 }
 
 /**
@@ -331,5 +335,17 @@ var inverse = function (A) {
   return mult(Q, mult(D, transpose(Q)));
 }
 
+/**
+ * Calculates the rank of a matrix: finds the eigenvalues of the matrix, removes
+ * repeats (this is not necesarily accurate...) and returns the length of the
+ * resulting array, less one if 0 is an element of the array.
+ * @param  {Array[Array[Number]]} A The matrix whose rank we wish to calculate
+ * @return {Number}   The matrix rank.
+ */
+var rank = function (A) {
+  var evals = QRDecompose(A)[1].map((s,i) => base.mRound(s[i],7));
+  return evals.reduce((a,b) => (b!=0)? a+1: a, 0);
+}
+
 // Exports for use elsewhere.
-module.exports = {add,concatenate,diagonal,eigens,innerProd,inverse,mult,QRDecompose,round,trace,transpose,vNorm,vNormalise,sym,equal,isZero,scale};
+module.exports = {add,concatenate,diagonal,eigens,innerProd,inverse,mult,QRDecompose,round,trace,transpose,vNorm,vNormalise,sym,equal,isZero,scale, rank};
