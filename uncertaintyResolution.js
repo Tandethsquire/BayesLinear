@@ -218,75 +218,76 @@ function build_node_list (parentData, rvs) {
   return data;
 }
 
-var xvals = [-0.1656, -0.1386, -0.1216, -0.0776, -0.0396, -0.0166, -0.0026, 0.0384, 0.0774, 0.1114, 0.1564, 0.1784];
-var yvals = [63.7, 59.5, 67.9, 68.8, 66.1, 70.4, 70, 73.7, 74.1, 79.6, 77.1, 82.8];
-var zvals = [20.3, 24.2, 18, 20.5, 20.1, 17.5, 18.2, 15.4, 17.8, 13.3, 16.7, 14.8];
-var a = new RV.rV('a', {'mu': 75, 'sigma': 4});
-var b = new RV.rV('b', {'mu': 40, 'sigma': 225});
-var c = new RV.rV('c', {'mu': 20, 'sigma': 1});
-var d = new RV.rV('d', {'mu': -30, 'sigma': 144});
-a.setCov(b,-6);
-a.setCov(c,-1);
-a.setCov(d,0);
-b.setCov(c,0);
-b.setCov(d,-90);
-c.setCov(d,-2.4);
-var varArr = [a,b,c,d];
-var e = [], f = [];
-for (var i=1; i<13; i++)
-{
-  e.push(new RV.rV(`e${i}`, {'mu': 0, 'sigma': 6.25}));
-  f.push(new RV.rV(`f${i}`, {'mu': 0, 'sigma': 4}));
-}
-for (var i=0; i<e.length; i++)
-{
-  varArr.forEach( function(s) {
-    s.setCov(e[i],0);
-  });
-  for (var j=0; j<f.length; j++)
-  {
-    e[j].setCov(e[i], (i==j)? 6.25: 0);
-    f[j].setCov(e[i], (i==j)? 2.5: 0);
-  }
-}
-for (var i=0; i<f.length; i++)
-{
-  varArr.forEach( function(s) {
-    s.setCov(f[i],0);
-  });
-  for (var j=0; j<e.length; j++)
-  {
-    f[j].setCov(f[i], (i==j)? 4: 0);
-    e[j].setCov(f[i], (i==j)? 2.5: 0);
-  }
-}
-var y = [], z = [];
-for (var i=0; i<12; i++)
-{
-  y.push(new RV.rV(`Y${i+1}`, {'rvs': [a,b,e[i]], 'coeffs': [1,xvals[i],1], 'independent': varArr.concat(e).concat(f).concat(y)}));
-}
-for (var i=0; i<12; i++)
-{
-  z.push(new RV.rV(`Z${i+1}`, {'rvs': [c,d,f[i]], 'coeffs': [1,xvals[i],1], 'independent': varArr.concat(e).concat(f).concat(y).concat(z)}));
-}
-
-// var stArr = []
-// var l = varArr.length;
-// for (var i=0; i<l; i++)
+// TESTING
+// var xvals = [-0.1656, -0.1386, -0.1216, -0.0776, -0.0396, -0.0166, -0.0026, 0.0384, 0.0774, 0.1114, 0.1564, 0.1784];
+// var yvals = [63.7, 59.5, 67.9, 68.8, 66.1, 70.4, 70, 73.7, 74.1, 79.6, 77.1, 82.8];
+// var zvals = [20.3, 24.2, 18, 20.5, 20.1, 17.5, 18.2, 15.4, 17.8, 13.3, 16.7, 14.8];
+// var a = new RV.rV('a', {'mu': 75, 'sigma': 4});
+// var b = new RV.rV('b', {'mu': 40, 'sigma': 225});
+// var c = new RV.rV('c', {'mu': 20, 'sigma': 1});
+// var d = new RV.rV('d', {'mu': -30, 'sigma': 144});
+// a.setCov(b,-6);
+// a.setCov(c,-1);
+// a.setCov(d,0);
+// b.setCov(c,0);
+// b.setCov(d,-90);
+// c.setCov(d,-2.4);
+// var varArr = [a,b,c,d];
+// var e = [], f = [];
+// for (var i=1; i<13; i++)
 // {
-//   var temp = varArr[i].standardise(varArr.concat(e).concat(f).concat(y).concat(z));
-//   varArr.push(temp);
-//   stArr.push(temp);
+//   e.push(new RV.rV(`e${i}`, {'mu': 0, 'sigma': 6.25}));
+//   f.push(new RV.rV(`f${i}`, {'mu': 0, 'sigma': 4}));
 // }
-
-var parentData = [
-  ['E', e, []],
-  ['F', f, [1]],
-  ['a', a, []],
-  ['b', b, [3]],
-  ['c', c, [3,4]],
-  ['d', d, [3,4,5]],
-  ['Y', y, [3,4,1]],
-  ['Z', z, [5,6,2]]
-]
-console.log(build_node_list(parentData,[e,f,a,b,c,d,y,z]));
+// for (var i=0; i<e.length; i++)
+// {
+//   varArr.forEach( function(s) {
+//     s.setCov(e[i],0);
+//   });
+//   for (var j=0; j<f.length; j++)
+//   {
+//     e[j].setCov(e[i], (i==j)? 6.25: 0);
+//     f[j].setCov(e[i], (i==j)? 2.5: 0);
+//   }
+// }
+// for (var i=0; i<f.length; i++)
+// {
+//   varArr.forEach( function(s) {
+//     s.setCov(f[i],0);
+//   });
+//   for (var j=0; j<e.length; j++)
+//   {
+//     f[j].setCov(f[i], (i==j)? 4: 0);
+//     e[j].setCov(f[i], (i==j)? 2.5: 0);
+//   }
+// }
+// var y = [], z = [];
+// for (var i=0; i<12; i++)
+// {
+//   y.push(new RV.rV(`Y${i+1}`, {'rvs': [a,b,e[i]], 'coeffs': [1,xvals[i],1], 'independent': varArr.concat(e).concat(f).concat(y)}));
+// }
+// for (var i=0; i<12; i++)
+// {
+//   z.push(new RV.rV(`Z${i+1}`, {'rvs': [c,d,f[i]], 'coeffs': [1,xvals[i],1], 'independent': varArr.concat(e).concat(f).concat(y).concat(z)}));
+// }
+//
+// // var stArr = []
+// // var l = varArr.length;
+// // for (var i=0; i<l; i++)
+// // {
+// //   var temp = varArr[i].standardise(varArr.concat(e).concat(f).concat(y).concat(z));
+// //   varArr.push(temp);
+// //   stArr.push(temp);
+// // }
+//
+// var parentData = [
+//   ['E', e, []],
+//   ['F', f, [1]],
+//   ['a', a, []],
+//   ['b', b, [3]],
+//   ['c', c, [3,4]],
+//   ['d', d, [3,4,5]],
+//   ['Y', y, [3,4,1]],
+//   ['Z', z, [5,6,2]]
+// ]
+// console.log(build_node_list(parentData,[e,f,a,b,c,d,y,z]));

@@ -30,7 +30,7 @@ var varianceScale = function (v, A, B) {
  * @return {[Array[Number], Number]}    The vector (possibly rescaled), and the correction.
  */
 var expectationCorrection = function (v, E1, E2) {
-  var expc = -1*v.map((s,i) => s[0]*E1[i]).reduce((a,b) => a+b, 0);
+  var expc = base.mRound(-1*v.map((s,i) => s[0]*E1[i]).reduce((a,b) => a+b, 0),4);
   var exp2 = v.map((s,i) => s[0]*E2[i]).reduce((a,b) => a+b, 0) + expc;
   if (exp2 < 0)
     return [v.map(s => [-1*s[0]]), -1*expc];
@@ -237,3 +237,5 @@ var standardised = function (dict, A, B, E1, E2, obs) {
 // var can = arrangeCanonical(canonicalQuantities(U1,U2),U1,U2,E1,E2);
 // console.log(can);
 // console.log(standardised(can,U1,U2,E1,E2,X));
+//
+module.exports = {arrangeCanonical, canonicalQuantities};
