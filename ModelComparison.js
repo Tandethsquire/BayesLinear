@@ -1,11 +1,12 @@
 const base = require('./boilerplate.js');
+const mat = require('./matrixAlgebra.js')
 const RV = require('./RV.js');
 const comp = require('./varianceComparison.js');
 
 var n = 13;
 var mus = new Array(n).fill(0).map(s => base.mRound(Math.random()*10-5,4));
-rwalkvar = 0.25;
-autovar = 0.25;
+rwalkvar = 0.75;
+autovar = 0.1;
 var alpha = 0.5;
 // Random Walk
 var xarr = [];
@@ -72,3 +73,6 @@ autocorrelation_variance = RV.build_variance_matrix(yarr.slice(1),yarr.slice(1))
 
 //TESTING
 // console.log(comp.arrangeCanonical(comp.canonicalQuantities(random_walk_variance,autocorrelation_variance),random_walk_variance,autocorrelation_variance,mus,mus,mus));
+//
+console.log(mat.round(mat.QRDecompose(autocorrelation_variance)[1]))
+//console.log(comp.arrangeCanonical(comp.canonicalQuantities(random_walk_variance,autocorrelation_variance)));

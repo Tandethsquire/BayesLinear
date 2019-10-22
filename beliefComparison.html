@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nodes</title>
+  <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML">
+  </script>
+  <script type='text/javascript' src='saveSvgAsPng.js'></script>
+</head>
+<body>
+  <div id="container">
+  </div>
+  <button id="saveButton">Save as PNG</button>
+  <script type="text/javascript">
+    function autoBox() {
+      const {x, y, width, height} = this.getBBox();
+      return [x, y, width, height];
+    }
+
+    function arcProperties(elem) {
+      var var1 = elem.var1, var2 = elem.var2, radius;
+      if (var1==0 && var2==0) return {'rup': 1, 'rlow': 1, 'shade': 0};
+      if (var1==0) return {'rup': 0, 'rlow': 1, 'shade': 1};
+      if (var2==0) return {'rup': 1, 'rlow': 0, 'shade': 2};
+      if (var2>1) return {'rup': 1/Math.sqrt(var2), 'rlow': 1/Math.sqrt(var2), 'shade': 1};
+      if (var2<1) return {'rup': Math.sqrt(var2), 'rlow': Math.sqrt(var2), 'shade': 2};
+      return {'rup': 0, 'rlow': 0, 'shade': 0};
+    }
+
+    function drawGraph() {
+      var colours = ['none', 'blue', 'green']
+      d3.select('#container').selectAll('svg').remove();
+      var margin = {top: 10, right: 30, bottom: 30, left: 40},
+        width = 800 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom,
+        radius = Math.min(width/2-100, height/2-100);
+
+      var svg = d3.select('#container').append('svg');
+      svg.attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .style('viewBox', `0 0 ${width} ${height}`)
+        .style('max-width', width)
+        .style('max-height', height)
+        .style('margin', '5px');
+
+      var gp = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+      var circ = gp.append('circle').attr('r', radius)
+        .attr('cx', 0).attr('cy', 0)
+        .attr('fill', 'none').attr('stroke', 'black');
+
+      var rangle = Math.PI/2;
+      var enterSelection = gp.selectAll('path').data(data).enter();
+      enterSelection.append('path')
+        .attr('d', d3.arc()
+          .innerRadius(d => d.rup*radius)
+          .outerRadius(radius)
+          .startAngle((d,i) => Math.PI/2-Math.PI*i/data.length)
+          .endAngle((d,i) => Math.PI/2-Math.PI*(i+1)/data.length)
+        )
+        .attr('fill', d => colours[d.shade])
+        .attr('stroke', 'black')
+        // .attr('transform', `translate(${width/2},${height/2})`)
+      enterSelection.append('path')
+        .attr('d', d3.arc()
+          .innerRadius(d => d.rlow*radius)
+          .outerRadius(radius)
+          .startAngle((d,i) => -Math.PI/2-Math.PI*i/data.length)
+          .endAngle((d,i) => -Math.PI/2-Math.PI*(i+1)/data.length)
+        )
+        .attr('fill', d => colours[d.shade])
+        .attr('stroke', 'black')
+        // .attr('transform', `translate(${width/2},${height/2})`)
+
+      for (var i=0; i<2*data.length; i++) {
+        gp.append('line')
+          .attr('x1', 0)
+          .attr('y1', 0)
+          .attr('x2', radius*Math.cos(i*Math.PI/data.length))
+          .attr('y2', -radius*Math.sin(i*Math.PI/data.length))
+          .attr('stroke', 'black')
+          // .attr('transform', `translate(${width/2},${height/2})`);
+        }
+
+      svg.attr('viewBox', autoBox)
+    }
+
+    d3.json('Beliefs/testBeliefs.json').then(function (json) {
+      data = json.map(s => arcProperties(s));
+      drawGraph();
+    })
+
+    // Not quite working: not sure why!
+    d3.select('#saveButton').on('click', function(){
+      saveSvgAsPng(document.getElementsByTagName('svg')[0], 'graph.png', {scale:2, backgroundColor: '#FFF'});
+    });
+  </script>
+</body>

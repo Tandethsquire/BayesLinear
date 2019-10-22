@@ -108,7 +108,7 @@ var readVector = function (str) {
  * @return {Number}      The rounded number
  */
 var mRound = function (n,prec) {
-  return ((Math.abs(1-n) <= 0.0001) ? 1 : ((Math.abs(n) <= 0.0001) ? 0 : parseFloat(n.toFixed(prec))));
+  return ((Math.abs(1-n) <= 0.0001) ? 1 : ((Math.abs(n) <= 0.0001) ? 0: ((Math.abs(n+1) <= 0.0001)? -1 : parseFloat(n.toFixed(prec)))));
 }
 
 // Exports to be used by other packages.

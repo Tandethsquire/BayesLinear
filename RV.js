@@ -100,6 +100,25 @@ var calculate_covariance = function(rv, rvs, coeffs) {
   return rvs.reduce((a,b,i) => a + coeffs[i]*rv.cov[b.nm], 0);
 }
 
+var rvs_from_matrix = function(names, expectations, variances) {
+  var rvArr = [];
+  if (names.length != expectations.length || names.length != variances.length)
+    throw new Error("The number of named random variables does not match the specification.")
+  for (var i=0; i<names.length; i++)
+  {
+    var tempRV = new rV(names[i], {mu: expectations[i], sigma: variances[i][i]});
+    rvArr.push(tempRV);
+  }
+  for (var i=0; i<rvArr.length; i++)
+  {
+    for (var j=0; j<i; j++)
+    {
+      rvArr[i].setCov(rvArr[j], variances[i][j]);
+    }
+  }
+  return rvArr;
+}
+
 /**
  * Creates a variance (or covariance) matrix from two collections of rVs.
  * @param  {Array[rV]} args1 The first set (creating the rows of the matrix)
@@ -111,4 +130,4 @@ var build_variance_matrix = function (args1, args2) {
   return outarr.map((s,i) => s.map((elem,j) => args1[i].cov[args2[j].nm]));
 }
 
-module.exports = {rV, build_variance_matrix};
+module.exports = {rV, build_variance_matrix, rvs_from_matrix};

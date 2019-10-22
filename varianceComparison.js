@@ -220,11 +220,11 @@ var standardised = function (dict, A, B, E1, E2, obs) {
       corr += qu.exp2*qu.correction;
     }
   }
-  gObs = gVec.map((s,i) => s*obs[i]).reduce((a,b) => a+b, 0) + corr;
-  g1 = gVec.map((s,i) => s*E1[i]).reduce((a,b) => a+b, 0) + corr;
-  g2 = gVec.map((s,i) => s*E2[i]).reduce((a,b) => a+b, 0) + corr;
-  gVar1 = mat.innerProd(gVec.map(s=>[s]),A);
-  gVar2 = mat.innerProd(gVec.map(s=>[s]),B);
+  gObs = base.mRound(gVec.map((s,i) => s*obs[i]).reduce((a,b) => a+b, 0) + corr,4);
+  g1 = base.mRound(gVec.map((s,i) => s*E1[i]).reduce((a,b) => a+b, 0) + corr,4);
+  g2 = base.mRound(gVec.map((s,i) => s*E2[i]).reduce((a,b) => a+b, 0) + corr,4);
+  gVar1 = base.mRound(mat.innerProd(gVec.map(s=>[s]),A),4);
+  gVar2 = base.mRound(mat.innerProd(gVec.map(s=>[s]),B),4);
   return {'observed': gObs, 'exp1': g1, 'exp2': g2, 'var1': gVar1, 'var2': gVar2};
 }
 
@@ -235,6 +235,7 @@ var standardised = function (dict, A, B, E1, E2, obs) {
 // var E2 = [0,0,0,0,1,0,0];
 // var X = [3,1,4,2,13,-5,14];
 // var can = arrangeCanonical(canonicalQuantities(U1,U2),U1,U2,E1,E2);
+// fs.writeFileSync('Beliefs/testBeliefs.json',JSON.stringify(can));
 // console.log(can);
 // console.log(standardised(can,U1,U2,E1,E2,X));
 //
