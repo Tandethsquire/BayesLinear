@@ -74,7 +74,7 @@ rV.prototype.setCov = function(that, cov, oneway = false) {
  * @return {rV}        The standardised rV.
  */
 rV.prototype.standardise = function(others) {
-  var constRV = new rV('temp', {'mu': -1*this.exp, 'sigma': 0});
+  var constRV = new rV('temp_variable', {'mu': -1*this.exp, 'sigma': 0});
   var totalRV = [this].concat(others);
   totalRV.forEach( function (s) {
     constRV.setCov(s,0);
@@ -82,7 +82,7 @@ rV.prototype.standardise = function(others) {
   var sigma = this.cov[this.nm];
   var result = new rV(`S(${this.nm})`, {'rvs': [this, constRV], 'coeffs': [1/Math.sqrt(sigma), 1/Math.sqrt(sigma)], 'independent': others});
   ([result].concat(totalRV)).forEach( function(s) {
-    delete s.cov['temp'];
+    delete s.cov['temp_variable'];
   })
   return result;
 }

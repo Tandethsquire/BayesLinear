@@ -131,7 +131,7 @@ var adjustment_bearing = function (B, D, d) {
  * @param  {Array[Number]} d2        The corresponding observations of D2
  * @return {Number}           The correlation
  */
-function pathCorrelation (dependent, D1, d1, D2, d2) {
+function path_correlation (dependent, D1, d1, D2, d2) {
   /**
    * A helper function to unpack coefficients from a name of an adjustment bearing.
    * I'm not super-keen on this, as it's dependent on regEx and any change in the
@@ -139,7 +139,7 @@ function pathCorrelation (dependent, D1, d1, D2, d2) {
    * @param  {rV} rV The adjustment bearing
    * @return {Dict}    The dictionary of coefficients
    */
-  var coeffsFromName = function (rV) {
+  var coeffs_from_name = function (rV) {
     var coeffsdict = {};
     Object.keys(rV.cov).forEach(function(s,i){
       if (i != 0) {
@@ -151,9 +151,8 @@ function pathCorrelation (dependent, D1, d1, D2, d2) {
     });
     return coeffsdict;
   }
-
   var z1 = adjustment_bearing(dependent, D1, d1), z2 = adjustment_bearing(dependent, D1.concat(D2), d1.concat(d2));
-  var a1 = coeffsFromName(z1), a2 = coeffsFromName(z2);
+  var a1 = coeffs_from_name(z1), a2 = coeffsFromName(z2);
   var v1 = [], v2 =[];
   for (var i=0; i<dependent.length; i++)
   {
@@ -218,118 +217,73 @@ function build_node_list (parentData, rvs) {
   return data;
 }
 
-// TESTING
-// var xvals = [-0.1656, -0.1386, -0.1216, -0.0776, -0.0396, -0.0166, -0.0026, 0.0384, 0.0774, 0.1114, 0.1564, 0.1784];
-// var yvals = [63.7, 59.5, 67.9, 68.8, 66.1, 70.4, 70, 73.7, 74.1, 79.6, 77.1, 82.8];
-// var zvals = [20.3, 24.2, 18, 20.5, 20.1, 17.5, 18.2, 15.4, 17.8, 13.3, 16.7, 14.8];
-// var a = new RV.rV('a', {'mu': 75, 'sigma': 4});
-// var b = new RV.rV('b', {'mu': 40, 'sigma': 225});
-// var c = new RV.rV('c', {'mu': 20, 'sigma': 1});
-// var d = new RV.rV('d', {'mu': -30, 'sigma': 144});
-// a.setCov(b,-6);
-// a.setCov(c,-1);
-// a.setCov(d,0);
-// b.setCov(c,0);
-// b.setCov(d,-90);
-// c.setCov(d,-2.4);
-// var varArr = [a,b,c,d];
-// var e = [], f = [];
-// for (var i=1; i<13; i++)
-// {
-//   e.push(new RV.rV(`e${i}`, {'mu': 0, 'sigma': 6.25}));
-//   f.push(new RV.rV(`f${i}`, {'mu': 0, 'sigma': 4}));
-// }
-// for (var i=0; i<e.length; i++)
-// {
-//   varArr.forEach( function(s) {
-//     s.setCov(e[i],0);
-//   });
-//   for (var j=0; j<f.length; j++)
-//   {
-//     e[j].setCov(e[i], (i==j)? 6.25: 0);
-//     f[j].setCov(e[i], (i==j)? 2.5: 0);
-//   }
-// }
-// for (var i=0; i<f.length; i++)
-// {
-//   varArr.forEach( function(s) {
-//     s.setCov(f[i],0);
-//   });
-//   for (var j=0; j<e.length; j++)
-//   {
-//     f[j].setCov(f[i], (i==j)? 4: 0);
-//     e[j].setCov(f[i], (i==j)? 2.5: 0);
-//   }
-// }
-// var y = [], z = [];
-// for (var i=0; i<12; i++)
-// {
-//   y.push(new RV.rV(`Y${i+1}`, {'rvs': [a,b,e[i]], 'coeffs': [1,xvals[i],1], 'independent': varArr.concat(e).concat(f).concat(y)}));
-// }
-// for (var i=0; i<12; i++)
-// {
-//   z.push(new RV.rV(`Z${i+1}`, {'rvs': [c,d,f[i]], 'coeffs': [1,xvals[i],1], 'independent': varArr.concat(e).concat(f).concat(y).concat(z)}));
-// }
-//
-// // var stArr = []
-// // var l = varArr.length;
-// // for (var i=0; i<l; i++)
-// // {
-// //   var temp = varArr[i].standardise(varArr.concat(e).concat(f).concat(y).concat(z));
-// //   varArr.push(temp);
-// //   stArr.push(temp);
-// // }
-//
-// var parentData = [
-//   ['E', e, []],
-//   ['F', f, [1]],
-//   ['a', a, []],
-//   ['b', b, [3]],
-//   ['c', c, [3,4]],
-//   ['d', d, [3,4,5]],
-//   ['Y', y, [3,4,1]],
-//   ['Z', z, [5,6,2]]
-// ]
-// console.log(build_node_list(parentData,[e,f,a,b,c,d,y,z]));
+/**
+ * Given a (ordered) list of rVs, determines the parent-child relationships between them.
+ * Outputs an array containing names, object specifications, and parents (indexing starting at 1).
+ * @param  {Array[rV]|Array[Array[rV]]} objects           The collected random variables.
+ * @param  {Array[String]} [names=undefined] The names of the quantities defined above
+ * @return {Array}                   The output details of the parent structure.
+ */
+function derive_parents(objects, names = undefined) {
+  var hier = [], nms = [];
+  for (var i=0; i<objects.length; i++)
+  {
+    hier.push(flatten(objects[i]));
+    (names === undefined || names.length != objects.length) ? nms.push(hier[i][0].nm) : nms.push(names[i]);
+  }
+  var parstruct = [];
+  for (var i=0; i<hier.length; i++)
+  {
+    var temparr = [nms[i], hier[i], []];
+    for (var j=0; j<i; j++)
+    {
+      if ((temparr[2].length == 0 && !mat.isZero(RV.build_variance_matrix(hier[i],hier[j]))) || !separation(hier[i], flatten(temparr[2].map(s => hier[s-1])), hier[j]))
+        temparr[2].push(j+1);
+    }
+    parstruct.push(temparr)
+  }
+  return parstruct;
+}
 
-var namesArr = ['rr','spo2','mask','temp','sbp','hr','acvpu'];
+/**
+ * Simple function to read a covariance matrix from a csv file.
+ * Assumes that the covariance matrix is formatted as given by
+ * write.csv(cov(data)) from R.
+ * @param  {String} filename The filename of the csv file (without the extension)
+ * @return {Array[Array[String], Array[rV]]} the names and the variance matrix, in array form.
+ */
+function read_from_csv(filename) {
+  file = fs.readFileSync(`${filename}.csv`,'utf-8').split('\r\n').map(s => s.split(','));
+  var varnames = file[0].slice(1).map(s => s.replace(/\"/g,""));
+  var outputarr = [];
+  for (var i=1; i<file.length-1; i++)
+  {
+    var temparr = [];
+    for (var j=1; j<file[i].length; j++)
+      temparr.push(base.mRound(parseFloat(file[i][j]),4))
+    outputarr.push(temparr);
+  }
+  return [varnames, outputarr];
+}
 
-// Full cohort NHS Data
-// var expArr = [0.13232011, 0.30801791, 0.37211578, 0.18427193, 0.39276282, 0.27805526, 0.02300561];
-// var varArr = [
-//   [0.30960827, 0.062445565, 0.126220074, 0.010970617, 0.011887843, 0.071922364, 0.021558333],
-//   [0.062445565, 0.410997228, 0.085974689, 0.000989576, 0.000989576, 0.042232836, 0.007701039],
-//   [0.126220074, 0.085974689, 0.60576294, 0.007998865, 0.031217081, 0.072979419, 0.023359595],
-//   [0.010970617, 0.000989576, 0.007998865, 0.17962317, 0.015956845, 0.003935831, 0.003532682],
-//   [0.011887843, 0.000989576, 0.031217081, 0.015956845, 0.554374701, 0.005958098, 0.00759824],
-//   [0.071922364, 0.042232836, 0.072979419, 0.003935831, 0.005958098, 0.299422075, 0.00948797],
-//   [0.021558333, 0.007701039, 0.023359595, 0.003532682, 0.00759824, 0.00948797, 0.068487753]
-// ];
-
-var varArr = [
-  [0.59643815,0.09262401,0.17230378,0.0710761,0.1152069,0.13954787,0.0783329],
-  [0.09262401,0.50707404,0.04079541,0.06884126,0.06355708,0.08929856,-0.01326606],
-  [0.17230378,0.04079541,0.54751982,-0.01457319,0.05034665,0.06502314,0.08512684],
-  [0.0710761,0.06884126,-0.01457319,0.34832039,0.04405332,0.08052007,0.01207414],
-  [0.1152069,0.06355708,0.05034665,0.04405332,0.65761338,0.10895727,0.0273307],
-  [0.13954787,0.08929856,0.06502314,0.08052007,0.10895727,0.43876319,0.03884463],
-  [0.0783329,-0.01326606,0.08512684,0.01207414,0.0273307,0.03884463,0.22269811]
-];
-var expArr = [0.24929577,0.34084507,0.32676056,0.28591549,0.36338028,0.37887324,0.07605634];
-
-
-var rvArr = RV.rvs_from_matrix(namesArr, expArr, varArr);
-ews = new RV.rV('ews', {rvs: rvArr, coeffs: [1,1,1,1,1,1,1]});
-
-var parentData = [
-  ['temp', [rvArr[3]], []],
-  ['hr', [rvArr[5]], []],
-  ['sbp', [rvArr[4]], []],
-  ['rr', [rvArr[0]], [2]],
-  ['spo2', [rvArr[1]], [2,4]],
-  ['mask', [rvArr[2]], [2,4,5]],
-  ['acvpu', [rvArr[6]], [3,4,6]],
-  ['ews', [ews], [1,2,3,4,5,6,7]]
-];
-var outEWS = build_node_list(parentData, [rvArr[3], rvArr[5], rvArr[4], rvArr[0], rvArr[1], rvArr[2], rvArr[6]]);
-fs.writeFileSync('ewsdata.json', JSON.stringify(outEWS));
+/*
+Testing: uses data derived from EWS stuff found in ewsfrailcov.csv.
+ */
+var filename = process.argv[2];
+if (filename != undefined) {
+  var details = read_from_csv(filename);
+  var namesArr = details[0], varArr = details[1], expArr = new Array(namesArr.length).fill(0);
+  var rvl = RV.rvs_from_matrix(namesArr,expArr,varArr);
+  rvl[16] = rvl[16].standardise(rvl);
+  // By-hand definitions: need to fix this.
+  combinednames = ['frailty','base1','resp1','acvpu1','ews1','base2','resp2','acvpu2','ews2'];
+  combinedrvl = [rvl[16],[rvl[0],rvl[1],rvl[2]],[rvl[3],rvl[4],rvl[5]],rvl[6],rvl[7],[rvl[8],rvl[9],rvl[10]],[rvl[11],rvl[12],rvl[13]],rvl[14],rvl[15]];
+  var parentData = derive_parents(combinedrvl,combinednames);
+  var nodesAndLinks = build_node_list(parentData, combinedrvl);
+  nodesAndLinks.links = nodesAndLinks.links.filter(s => s.arriving != 0);
+  var outfilename = (process.argv[3] != undefined) ? process.argv[3]: 'output';
+  fs.writeFileSync(`${outfilename}.json`, JSON.stringify(nodesAndLinks));
+  console.log(`Node and link details written to ${outfilename}.json.`)
+}
+else
+  console.log("No covariance data provided.")
