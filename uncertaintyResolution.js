@@ -237,7 +237,12 @@ function derive_parents(objects, names = undefined) {
     var temparr = [nms[i], hier[i], []];
     for (var j=0; j<i; j++)
     {
-      if ((temparr[2].length == 0 && !mat.isZero(RV.build_variance_matrix(hier[i],hier[j]))) || !separation(hier[i], flatten(temparr[2].map(s => hier[s-1])), hier[j]))
+      if (temparr[2].length == 0)
+      {
+        if (!mat.isZero(RV.build_variance_matrix(hier[i],hier[j])))
+          temparr[2].push(j+1)
+      }
+      else if (!separation(hier[i], flatten(temparr[2].map(s => hier[s-1])), hier[j]))
         temparr[2].push(j+1);
     }
     parstruct.push(temparr)
@@ -267,14 +272,13 @@ function read_from_csv(filename) {
 }
 
 /*
-Testing: uses data derived from EWS stuff found in ewsfrailcov.csv.
+Testing: uses data derived from sample covariance matrix found in sample.csv.
  */
 var filename = process.argv[2];
 if (filename != undefined) {
   var details = read_from_csv(filename);
   var namesArr = details[0], varArr = details[1], expArr = new Array(namesArr.length).fill(0);
   var rvl = RV.rvs_from_matrix(namesArr,expArr,varArr);
-  rvl[16] = rvl[16].standardise(rvl);
   // By-hand definitions: need to fix this.
   combinednames = ['frailty','base1','resp1','acvpu1','ews1','base2','resp2','acvpu2','ews2'];
   combinedrvl = [rvl[16],[rvl[0],rvl[1],rvl[2]],[rvl[3],rvl[4],rvl[5]],rvl[6],rvl[7],[rvl[8],rvl[9],rvl[10]],[rvl[11],rvl[12],rvl[13]],rvl[14],rvl[15]];

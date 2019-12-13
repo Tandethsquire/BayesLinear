@@ -348,4 +348,4 @@ var rank = function (A) {
 }
 
 // Exports for use elsewhere.
-module.exports = {add,concatenate,diagonal,eigens,innerProd,inverse,mult,QRDecompose,round,trace,transpose,vNorm,vNormalise,sym,equal,isZero,scale, rank};
+module.exports = {add,concatenate,diagonal,eigens,innerProd,inverse,mult,QRDecompose,round,trace,transpose,vNorm,vNormalise,sym,equal,isZero,scale,rank};

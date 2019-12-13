@@ -6,12 +6,10 @@
   <script type="text/javascript" async
     src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML">
   </script>
-  <script type='text/javascript' src='saveSvgAsPng.js'></script>
 </head>
 <body>
   <div id="container">
   </div>
-  <button id="saveButton">Save as PNG</button>
   <script type="text/javascript">
     function autoBox() {
       const {x, y, width, height} = this.getBBox();
@@ -90,10 +88,5 @@
       data = json.map(s => arcProperties(s));
       drawGraph();
     })
-
-    // Not quite working: not sure why!
-    d3.select('#saveButton').on('click', function(){
-      saveSvgAsPng(document.getElementsByTagName('svg')[0], 'graph.png', {scale:2, backgroundColor: '#FFF'});
-    });
   </script>
 </body>

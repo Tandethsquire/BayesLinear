@@ -16,11 +16,17 @@ The code is in multiple parts (which will continue to be modified and re-jigged 
 - *varianceComparison.js* : This deals with belief comparisons. Functions here calculate canonical quantities of some chosen belief(s), find observed adjustments, work out residuals for specification diagnostics, and package this information up in an easily-exportable way.
 - *RV.js* : A small file for defining and dealing with random variables. Creates objects of type `rV`, with expectation, variance, and covariances as properties.
 - *uncertaintyResolution.js* : This has a similar scope to varianceComparison.js, but it centres around node resolutions and node diagnostics. Functions operating on `rV` objects are used to generate (potentially partial) transformation matrices for B given D, calculate uncertainty resolution from one random variable to another, find bearings and sizes of adjustments, find the heart of a transform, and create a tree of dependencies from the result.
-- *<filename\>.html*: Typically used for displaying the results of the above packages. D3.js is used heavily to create visualisations of these adjustments, dependencies, and resolutions.
+- *<filename>.html*: Typically used for displaying the results of the above packages. D3.js is used heavily to create visualisations of these adjustments, dependencies, and resolutions.
 
 ## Usage ##
 Any pure JavaScript files are written with command-line usage in mind, and particularly using node.js. Outputs can be written to file (in json or csv format) to be pushed to the .html visualisation.
 
+## To do ##
+- There are some aspects of `uncertaintyResolution.js` that would benefit from more testing (for example, the `path_correlation` function and related), and where it could be made more user-friendly. It would be preferable to have the user input the node structure (eg combined nodes) as a command-line argument, rather than changing the code directly.
+- Data visualisation: any alternative ways to view the data is always useful. In particular, the plots from `beliefComparison.html` suffer from redundancy in displayed information
+- More functionality! Suggestions welcome.
+
+## Main File Summaries ##
 ### varianceComparison.js ###
 Take a system of two variables, X1 and X2. Define the variance in two different specifications H1 and H2 as
 - **H1**: Var(X1)=2, Var(X2)=4, Cov(X1,X2)=1, E(X1)=0, E(X2)=0;
@@ -73,6 +79,7 @@ console.log(Y);
  * Output is a rV with fields
  * nm: 'Y', exp: 5, cov: {Y: 12.5, a: 2, b: 5, e: 0.5}
  */
+// If parent data is not known, instead use derive_parents([a,b,e,Y])
 var parentData = [
   ['a', a, []],
   ['b', b, [1]],
@@ -94,3 +101,5 @@ console.log(buildNodeList(parentData, [a,b,e,Y]));
  *   { source: 3, target: 4, leaving: 0.04, arriving: 0.04 } ] }
  */
 ```
+
+It is also possible to import variance data, instead of building random variables by hand, using the `read_from_csv` function (which, at present, is a bit unstable) and the `RV.rvs_from_matrix` function. Some working code using `sample.csv` is included in the file.

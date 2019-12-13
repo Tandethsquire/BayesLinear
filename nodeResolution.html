@@ -6,7 +6,6 @@
   <script type="text/javascript" async
     src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML">
   </script>
-  <script type='text/javascript' src='saveSvgAsPng.js'></script>
 </head>
 <body>
   <div id="container">
@@ -19,7 +18,6 @@
       <option value='heartData.json'>Heart of the transform</option>
     </select>
   </div>
-  <button id='saveButton'>Save as PNG</button>
   <script type="text/javascript">
     var radius = 70;
     var rectwidth = radius, rectheight = radius/5;
@@ -171,9 +169,6 @@
         d.fy = (d3.event.y < 3*radius/2) ? 3*radius/2: (d3.event.y > height-radius-10) ? height-radius-10 : d3.event.y;
       }
     }
-    d3.select('#saveButton').on('click', function(){
-      saveSvgAsPng(document.getElementsByTagName('svg')[0], 'graph.png', {scale:2, backgroundColor: '#FFF'});
-    });
 
     function init(filename) {
       d3.json(`Nodes/${filename}`).then(function (json) {
